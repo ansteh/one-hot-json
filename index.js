@@ -9,7 +9,10 @@ const OneHotString = (values) => {
   let uniques = _.uniq(values);
 
   let encode = (value) => {
-    return _.findIndex(uniques, value);
+    if(_.indexOf(uniques, value) === -1) {
+      uniques.push(value);
+    }
+    return _.findIndex(uniques, str => str === value);
   };
 
   let decode = (index) => {
@@ -22,28 +25,65 @@ const OneHotString = (values) => {
   };
 };
 
-const getTypes = (paths, json) => {
-  return _.map(paths, (path) => {
-    let value = _.get(json, path);
-    if(_.isString(value)) return 'string';
-  });
+const getType = (path, json) => {
+  let value = _.get(json, path);
+  if(_.isString(value)) return 'string';
+  if(_.isNumber(value)) return 'number';
+  if(_.isBoolean(value)) return 'boolean';
 };
 
-const onehot = (collection) => {
-  let paths = pathfinder.parse(_.first(collection));
+const onehot = (reference) => {
+  let paths = pathfinder.parse(reference);
 
-  let flatten = shape.array.scheme(paths);
-  let encode = () => {
+  let patterns = _.map(paths, (path, index) => {
+    let pattern = {
+      path: path,
+      type: getType(path, reference)
+    };
 
+    if(pattern.type === 'string') {
+      pattern.onehot = OneHotString([]);
+    }
+
+    if(pattern.type === 'boolean') {
+      pattern.onehot = OneHotString(['false', 'true']);
+    }
+
+    return pattern;
+  });
+
+  let flatten = shape.array.reverse(paths);
+  let encode = (collection) => {
+    if(_.isArray(collection) === false) collection = [collection];
+    return _.map(collection, item => {
+      let row = flatten(item);
+      return _.map(patterns, (pattern, index) => {
+        if(pattern.onehot) {
+          return pattern.onehot.encode(row[index]);
+        }
+        return row[index];
+      });
+    });
   };
 
-  let deflatten = shape.array.reverse(paths);
-  let decode = () => {
-
+  let deflatten = shape.array.scheme(paths);
+  let decode = (collection) => {
+    if(_.isArray(collection) === false) collection = [collection];
+    return _.map(collection, row => {
+      return deflatten(_.map(patterns, (pattern, index) => {
+        let value = row[index];
+        if(pattern.onehot) {
+          value = pattern.onehot.decode(value);
+        }
+        return value;
+      }));
+    });
   };
 
   return {
-    encode: flatten,
-    decode: deflatten
+    encode: encode,
+    decode: decode
   };
 };
+
+module.exports = onehot;
