@@ -1,6 +1,6 @@
 {
   "name": "one-hot-json",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "flattening JSON Objects and encoding values via one-hot approach",
   "main": "index.js",
   "scripts": {},
@@ -24,7 +24,7 @@
     "url": "https://github.com/ansteh/one-hot-json/issues"
   },
   "dependencies": {
-    "json-pathfinder": "0.0.1",
+    "json-pathfinder": "0.0.2",
     "lodash": "^4.16.6",
     "shape-array": "^1.0.10"
   },
