@@ -56,7 +56,8 @@ let encoded:  = User.encode(input);
 Decoding:
 ```js
 let decoded = User.decode(encoded);
-console.log(JSON.stringify(input) === JSON.stringify(decoded)); //true
+console.log(JSON.stringify(input) === JSON.stringify(decoded));
+//true
 ```
 Usecase: encoded matrix as output from a replication or machine learning algorithms.
 ```js
@@ -69,5 +70,6 @@ let deformatedEncoding = [
 ];
 
 let decodedDeformation = User.decode(deformatedEncoding);
-console.log(JSON.stringify(input) === JSON.stringify(decodedDeformation));//true
+console.log(JSON.stringify(input) === JSON.stringify(decodedDeformation));
+//true
 ```
