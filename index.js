@@ -15,8 +15,31 @@ const OneHotString = (values) => {
     return _.findIndex(uniques, str => str === value);
   };
 
-  let decode = (index) => {
-    return uniques[index];
+  let decode = (number) => {
+    return uniques[_.round(number)];
+  };
+
+  return {
+    encode: encode,
+    decode: decode
+  };
+};
+
+const OneHotNumber = (values) => {
+  let type = 'integer';
+
+  let encode = (value) => {
+    if(_.isInteger(value) === false) {
+      type = 'float';
+    }
+    return value;
+  };
+
+  let decode = (value) => {
+    if(type === 'integer') {
+      return _.round(value);
+    }
+    return value;
   };
 
   return {
@@ -28,8 +51,8 @@ const OneHotString = (values) => {
 const getType = (path, json) => {
   let value = _.get(json, path);
   if(_.isString(value)) return 'string';
-  if(_.isNumber(value)) return 'number';
   if(_.isBoolean(value)) return 'boolean';
+  if(_.isNumber(value)) return 'number';
 };
 
 const onehot = (reference) => {
@@ -42,11 +65,15 @@ const onehot = (reference) => {
     };
 
     if(pattern.type === 'string') {
-      pattern.onehot = OneHotString([]);
+      pattern.onehot = OneHotString([_.get(reference, path)]);
     }
 
     if(pattern.type === 'boolean') {
       pattern.onehot = OneHotString(['false', 'true']);
+    }
+
+    if(pattern.type === 'number') {
+      pattern.onehot = OneHotNumber([_.get(reference, path)]);
     }
 
     return pattern;
